@@ -1,10 +1,12 @@
 let data; 
 
-fetch('static/js/vaccination_df.json')
+// Fetch data from the API endpoint
+fetch('/api/vaccination')
   .then(response => response.json())
   .then(jsonData => {
-    data = jsonData; // Assign the fetched data to the outer variable
+    data = jsonData; 
 
+    // Extract unique country names from the data
     let countryNames = [...new Set(data.map(entry => entry.location))];
     let selectedCountries = [];
 
@@ -17,15 +19,18 @@ fetch('static/js/vaccination_df.json')
       countrySelectElement.appendChild(option);
     });
   
-
+// Function to handle search button click
     function handleSearch() {
+  // Get the search inputs
   let searchCountry = document.getElementById('countrySearch').value.toLowerCase();
   let searchDay = document.getElementById('daySearch').value;
 
+  // Get DOM elements
   let startMessageElement = document.getElementById('startMessage');
   let lineChartElement = document.getElementById('lineChart');
   let searchedDayVaccinationsElement = document.getElementById('searchedDayVaccinations');
 
+  // Filter the data based on the search inputs and generate yearly vaccination data
   let filteredData = data.filter(entry => {
     let entryCountry = entry.location.toLowerCase();
     let entryDate = entry.date.split('T')[0];
@@ -52,6 +57,7 @@ fetch('static/js/vaccination_df.json')
       return yearlyTotal;
     });
 
+    // Create chart data for Plotly
     let chartData = [{
       x: years,
       y: totalVaccinations,
@@ -89,6 +95,7 @@ fetch('static/js/vaccination_df.json')
       }
     };
 
+    // Create or update the line chart with the chart data
     Plotly.newPlot('lineChart', chartData, layout);
     lineChartElement.style.display = 'block';
 
@@ -105,9 +112,10 @@ fetch('static/js/vaccination_df.json')
   }
 }
 
-
+    // Add event listener to the search button
     document.getElementById('searchButton').addEventListener('click', handleSearch);
 
+    // Add event listener to the country search input for Enter key press
     document.getElementById('countrySearch').addEventListener('keydown', function(event) {
       if (event.key === 'Enter') {
         handleSearch();
@@ -115,17 +123,19 @@ fetch('static/js/vaccination_df.json')
       }
     });
 
+    // Add event listener to the compare button
     document.getElementById('compareButton').addEventListener('click', function() {
       selectedCountries = Array.from(document.getElementById('countrySelect').selectedOptions, option => option.value.toLowerCase());
       handleComparison();
     });
     
+    // Add event listener to the reset button
     document.getElementById('resetButton').addEventListener('click', function() {
-      selectedCountries = []; // Clear the selected countries
-      handleSearch(); // Reset the line chart
+      selectedCountries = []; 
+      handleSearch(); 
     });
     
-
+    // Function to handle country comparison
     function handleComparison() {
       let startMessageElement = document.getElementById('startMessage');
       let lineChartElement = document.getElementById('lineChart');

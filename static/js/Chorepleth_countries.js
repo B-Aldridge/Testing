@@ -77,7 +77,4 @@ function createChoroplethMap() {
 // Fetch the continent data from the CSV file
 fetchContinentsFromCSV('static/js/continent_data.csv');
 
-
-
-
-//dataset results accurate as of 6/15 for total cases
+//dataset results accurate as of 6/15/23 for total cases

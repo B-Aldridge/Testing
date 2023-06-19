@@ -1,27 +1,39 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jun 19 14:00:08 2023
+from flask import Flask, render_template, jsonify
+from flask_pymongo import PyMongo
 
-@author: joshu
-"""
-
-from flask import Flask
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
-
+# Define and connect
 app = Flask(__name__)
+app.config['MONGO_URI'] = 'mongodb://localhost:27017/vaccination'
+mongo = PyMongo(app)
 
-class MyEventHandler(FileSystemEventHandler):
-    def on_any_event(self, event):
-        print(f'Event type: {event.event_type}, Path: {event.src_path}')
+# Fetch data from MongoDB
+def fetch_data():
+    data = mongo.db.vac.find()
+    json_data = []
+    for entry in data:
+        entry['_id'] = str(entry['_id']) 
+        json_data.append(entry)
+    return json_data
+
+# Route for API endpoint to fetch data
+@app.route('/api/vaccination')
+def api_vaccination():
+    data = fetch_data()
+    return jsonify(data)
 
 @app.route('/')
 def index():
-    return 'Flask Watchdog Example'
+    return render_template('index.html')
+
+@app.route('/dashboard')
+def show_dashboard():
+    data = fetch_data()
+    return render_template('mapIndex.html', data=data)
+
+@app.route('/map')
+def show_map():
+    data = fetch_data()
+    return render_template('Choropleth_Continents.html', data=data)
 
 if __name__ == '__main__':
-    observer = Observer()
-    event_handler = MyEventHandler()
-    observer.schedule(event_handler, path='.', recursive=True)
-    observer.start()
-    app.run(debug=True)
+    app.run(debug=False)
